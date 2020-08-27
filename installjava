@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/bash
-
+#Checking if required packages as installed
+apt-cache policy proot aria2 | grep 'Installed: (none)' -B1 | sed '/^--$/d;s/://g;p;n' -n | xargs apt install
 #Setup
 shopt -s expand_aliases
 alias ee='echo -e'
@@ -35,7 +36,7 @@ else
 	
 	#Actual installation
 	ee "\e[32m[*] \e[34mDownloading JDK-8 (~70Mb) for ${archname}...  🕛This will take some time, so better make a coffee.🕛"
-	wget https://github.com/Hax4us/java/releases/download/${tag}/jdk8_${archname}.tar.gz -q
+	aria2c --file-allocation=none -x 16 -s 16 https://github.com/Hax4us/java/releases/download/${tag}/jdk8_${archname}.tar.gz -q
 	
 	ee "\e[32m[*] \e[34mMoving JDK to system..."
 	mv jdk8_${archname}.tar.gz $PREFIX/share
@@ -47,7 +48,8 @@ else
 	ee "\e[32m[*] \e[34mSeting-up %JAVA_HOME%..."
 	export JAVA_HOME=$PREFIX/share/jdk8
 	echo "export JAVA_HOME=$PREFIX/share/jdk8" >> $HOME/.profile
-	
+	echo 'alias java="proot -0 java"' >> "$PREFIX/etc/bash.bashrc"
+        source "$PREFIX/etc/bash.bashrc"
 	ee "\e[32m[*] \e[34mCoping Java wrapper scripts to bin..."
 	#I'm not 100% sure, but getting rid of bin contnent MAY cause some issues with %JAVA_HOME%, thus it's no longer moved - copied instead. Sorry to everyone short on storage.
 	cp bin/* $PREFIX/bin
